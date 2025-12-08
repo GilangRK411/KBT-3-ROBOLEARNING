@@ -1,22 +1,12 @@
-import CategoryBar, { CategoryItem } from "./partials/categoryBar";
-import EventsSection from "./partials/eventsSection";
-import FloatingBadges from "./partials/floatingBadges";
-import FooterSection from "./partials/footerSection";
-import HeroSection from "./partials/heroSection";
-import NavigationBar from "./partials/navigationBar";
-import PackagesSection, { PackageItem } from "./partials/packagesSection";
-import PromoBanner from "./partials/promoBanner";
-import StepsSection from "./partials/stepsSection";
-import TestimonialsSection from "./partials/testimonialsSection";
-
-const categories: CategoryItem[] = [
-  { label: "IoT & Robotika", icon: "IoT", active: true },
-  { label: "Kit Pembelajaran", icon: "Kit" },
-  { label: "Workshop & Training", icon: "WS" },
-  { label: "Konsultasi Proyek", icon: "KP" },
-  { label: "Pelatihan Guru", icon: "Guru" },
-  { label: "Semua Produk", icon: "All" },
-];
+import EventsSection from "./partials/events-section";
+import FloatingBadges from "./partials/floating-badges";
+import FooterSection from "./partials/footer-section";
+import HeroSection from "./partials/hero-section";
+import NavigationBar from "./partials/navigation-bar";
+import PackagesSection, { PackageItem } from "./partials/packages-section";
+import PromoBanner from "./partials/promo-banner";
+import StepsSection from "./partials/steps-section";
+import TestimonialsSection from "./partials/testimonials-section";
 
 const packages: PackageItem[] = [
   {
@@ -110,7 +100,6 @@ export default function LandingPage() {
       <NavigationBar />
       <main className="mx-auto max-w-screen-xl space-y-10 px-4 pb-16 pt-6">
         <HeroSection />
-        <CategoryBar items={categories} />
         <PackagesSection packages={packages} />
         <TestimonialsSection />
         <StepsSection />

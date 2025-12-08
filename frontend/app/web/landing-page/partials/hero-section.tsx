@@ -120,32 +120,6 @@ export default function HeroSection() {
                 </div>
               </div>
             </div>
-
-            <div className="flex flex-col gap-3 rounded-2xl border border-[#F5EDED] bg-white p-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-[#000000]">Rekomendasi cepat</p>
-                <span className="rounded-full bg-[#D72323]/10 px-2 py-1 text-[10px] font-semibold text-[#D72323]">
-                  IoT
-                </span>
-              </div>
-              <div className="space-y-2 text-xs text-[#3E3636]">
-                <div className="flex items-center justify-between">
-                  <span>Kit Smart Home</span>
-                  <span className="font-semibold text-[#D72323]">Ready stock</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Workshop weekend</span>
-                  <span className="font-semibold text-[#D72323]">Slot terbatas</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Konsultasi kurikulum STEM</span>
-                  <span className="font-semibold text-[#D72323]">Buka jadwal</span>
-                </div>
-              </div>
-              <button className="mt-auto self-start rounded-full bg-[#D72323] px-4 py-2 text-xs font-semibold text-white transition hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D72323]">
-                Lihat jadwal sesi
-              </button>
-            </div>
           </div>
         </div>
       </div>
