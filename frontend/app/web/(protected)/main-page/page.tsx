@@ -1,95 +1,58 @@
-import EventsSection from "./partials/events-section";
 import FloatingBadges from "./partials/floating-badges";
 import FooterSection from "./partials/footer-section";
 import HeroSection from "./partials/hero-section";
 import NavigationBar from "./partials/navigation-bar";
 import PackagesSection, { PackageItem } from "./partials/packages-section";
 import PromoBanner from "./partials/promo-banner";
-import StepsSection from "./partials/steps-section";
-import TestimonialsSection from "./partials/testimonials-section";
 
 const packages: PackageItem[] = [
   {
-    icon: "PF",
-    badge: "Platform",
+    icon: "M1",
+    badge: "Membership",
     badgeTone: "primary",
-    title: "Platform Pembelajaran IoT & Robotika",
-    description:
-      "Video, simulasi IoT, live session, dan dashboard progres untuk guru & siswa.",
-    features: ["Simulasi sensor & aktuator", "Latihan coding microcontroller", "Dashboard kelas"],
-    priceNote: "Akses tahunan",
-    price: "Mulai dari Rp 180.000/bln",
-    discount: "Promo Tech Week",
-    tag: "Digital",
-    cta: "Coba gratis",
+    title: "Langganan 1 Bulan",
+    description: "Coba full akses kelas dan live session selama 30 hari.",
+    features: [
+      "Semua kelas IoT & robotika + rekaman",
+      "Simulasi cloud lab & modul coding",
+      "1x sesi mentor check-in dan review proyek",
+    ],
+    priceNote: "Paket fleksibel",
+    price: "Rp 500.000 / bulan",
+    tag: "Coba dulu",
+    cta: "Mulai 1 Bulan",
   },
   {
-    icon: "KB",
-    badge: "Kit Fisik",
+    icon: "M3",
+    badge: "Membership",
     badgeTone: "dark",
-    title: "Kit IoT & Robotika - Basic",
-    description: "Starter kit dengan sensor dasar, microcontroller, dan modul konektivitas.",
-    features: ["Panduan proyek pemula", "Pengiriman 1-3 hari", "Garansi komponen"],
-    price: "Mulai dari Rp 1,2 juta",
-    tag: "Kit Pembelajaran",
+    title: "Langganan 3 Bulan",
+    description: "Belajar konsisten dengan jalur terarah dan komunitas.",
+    features: [
+      "Semua kelas + live cohort & challenge",
+      "Simulasi cloud lab & kit sharing",
+      "4x mentor check-in + forum diskusi",
+    ],
+    priceNote: "Hemat 10%",
+    price: "Rp 1.350.000 / 3 bulan",
+    tag: "Paling diminati",
+    cta: "Pilih 3 Bulan",
   },
   {
-    icon: "KA",
-    badge: "Kit Fisik",
+    icon: "M6",
+    badge: "Membership",
     badgeTone: "primary",
-    title: "Kit IoT & Robotika - Advanced",
-    description: "Dukungan AI edge, kamera, dan modul komunikasi lanjutan untuk proyek serius.",
-    features: ["Project lab AI edge", "Dokumentasi lengkap", "Sertifikat proyek"],
-    price: "Mulai dari Rp 2,8 juta",
-    tag: "Kit Pembelajaran",
-  },
-  {
-    icon: "TP",
-    badge: "Project",
-    badgeTone: "dark",
-    title: "Thematic Project Kit",
-    description: "Paket proyek Smart Home, AgroTech, atau EcoCity untuk showcase sekolah.",
-    features: ["Blueprint tematik", "Mentoring 2x sesi", "Demo day virtual"],
-    tag: "Project-based",
-  },
-  {
-    icon: "TR",
-    badge: "Workshop",
-    badgeTone: "primary",
-    title: "Workshop & Pelatihan Praktis",
-    description: "Sesi intensif tatap muka atau online dengan mentor robotika industri.",
-    features: ["Kelas weekend", "Cohort kecil", "Toolkit dipinjamkan"],
-    priceNote: "Batch Januari",
-    tag: "Workshop",
-    cta: "Lihat jadwal",
-  },
-  {
-    icon: "KG",
-    badge: "Guru",
-    badgeTone: "dark",
-    title: "Pelatihan Guru & Integrasi STEM",
-    description: "Pendampingan kurikulum, bank soal, dan modul ajar robotika untuk sekolah.",
-    features: ["Modul ajar siap pakai", "Sesi konsultasi", "Lisensi kelas"],
-    tag: "Pelatihan Guru",
-  },
-  {
-    icon: "KP",
-    badge: "Konsultasi",
-    badgeTone: "primary",
-    title: "Konsultasi Proyek Pribadi",
-    description: "Bimbingan membangun prototype robotika atau IoT sesuai targetmu.",
-    features: ["Review desain & BOM", "Coaching mingguan", "Rencana uji coba"],
-    tag: "Konsultasi",
-    cta: "Atur sesi",
-  },
-  {
-    icon: "ST",
-    badge: "Support",
-    badgeTone: "dark",
-    title: "Konsultasi Kurikulum STEM",
-    description: "Integrasi IoT/robotika ke kurikulum sekolah dengan asesmen dan reporting.",
-    features: ["Audit kesiapan", "Desain kurikulum", "Laporan berkala"],
-    tag: "STEM",
+    title: "Langganan 6 Bulan",
+    description: "Roadmap lengkap dengan pendampingan intensif sampai finish.",
+    features: [
+      "Akses semua kelas & update materi baru",
+      "Simulasi cloud lab + proyek tematik",
+      "Coaching mingguan, career prep, prioritas support",
+    ],
+    priceNote: "Hemat 20%",
+    price: "Rp 2.400.000 / 6 bulan",
+    tag: "Serius upgrade",
+    cta: "Ambil 6 Bulan",
   },
 ];
 
@@ -101,9 +64,6 @@ export default function LandingPage() {
       <main className="mx-auto max-w-screen-xl space-y-10 px-4 pb-16 pt-6">
         <HeroSection />
         <PackagesSection packages={packages} />
-        <TestimonialsSection />
-        <StepsSection />
-        <EventsSection />
         <FooterSection />
       </main>
       <FloatingBadges />

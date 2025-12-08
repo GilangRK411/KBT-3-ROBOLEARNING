@@ -17,7 +17,6 @@ const ContextUserIDKey = "userID"
 func AuthMiddleware(tokenMaker *token.JWTMaker, repo *repository.UserRepository) gin.HandlerFunc {
     return func(c *gin.Context) {
 
-        // Izinkan preflight tanpa autentikasi
         if c.Request.Method == http.MethodOptions {
             c.Next()
             return
