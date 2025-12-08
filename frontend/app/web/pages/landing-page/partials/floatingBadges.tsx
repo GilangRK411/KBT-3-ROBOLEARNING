@@ -1,6 +1,6 @@
 const badges = [
-  { title: "Promo Semester Baru", note: "Diskon sampai 52%" },
-  { title: "Gratis Konsultasi", note: "Atur jadwal dengan mentor" },
+  { title: "+908K members", note: "Komunitas pembelajar IoT & robotika" },
+  { title: "Mitra sekolah", note: "200+ sekolah & kampus berkolaborasi" },
 ];
 
 export default function FloatingBadges() {

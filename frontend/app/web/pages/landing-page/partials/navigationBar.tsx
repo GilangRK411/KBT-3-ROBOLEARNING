@@ -1,4 +1,4 @@
-const navItems = ["Produk", "Offline Centers", "Program", "Promo", "Event", "Testimoni"];
+const navItems = ["Produk", "Kit", "Workshop", "Konsultasi", "Event", "Testimoni"];
 
 export default function NavigationBar() {
   return (
@@ -17,13 +17,13 @@ export default function NavigationBar() {
               key={item}
               className="transition hover:text-[#D72323] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D72323]"
             >
-              {item}git add README.md
+              {item}
             </button>
           ))}
         </div>
 
         <button className="rounded-full border border-[#D72323] px-4 py-2 text-xs font-semibold text-[#D72323] transition hover:bg-[#D72323] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D72323]">
-          Beli Paket Belajars
+          Dapatkan Akses
         </button>
       </div>
     </div>
