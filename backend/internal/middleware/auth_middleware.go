@@ -17,13 +17,19 @@ const ContextUserIDKey = "userID"
 // AuthMiddleware validates JWT access tokens and ensures they are still stored and unexpired.
 func AuthMiddleware(tokenMaker *token.JWTMaker, repo *repository.UserRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if !strings.HasPrefix(authHeader, "Bearer ") {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing bearer token"})
+		raw, err := c.Cookie("access_token")
+		if err != nil || raw == "" {
+			authHeader := c.GetHeader("Authorization")
+			if strings.HasPrefix(authHeader, "Bearer ") {
+				raw = strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+			}
+		}
+
+		if raw == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing access token"})
 			return
 		}
 
-		raw := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
 		claims, err := tokenMaker.VerifyAccessToken(raw)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})

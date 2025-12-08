@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -17,6 +18,9 @@ type Config struct {
 	RefreshTokenTTL time.Duration
 	ServerPort      string
 	PasswordKey     string
+	CookieDomain    string
+	CookieSecure    bool
+	CookieSameSite  string
 }
 
 // Load reads configuration from environment variables and applies safe defaults.
@@ -32,12 +36,24 @@ func Load() Config {
 		RefreshTokenTTL: 48 * time.Hour, // 2 days
 		ServerPort:      envOrDefault("PORT", "8080"),
 		PasswordKey:     envOrDefault("PASSWORD_KEY", "robolearning-password-key-32bytes!"),
+		CookieDomain:    envOrDefault("COOKIE_DOMAIN", ""),
+		CookieSecure:    envOrDefaultBool("COOKIE_SECURE", true), // default secure for HTTPS; override to false for local HTTP
+		CookieSameSite:  envOrDefault("COOKIE_SAME_SITE", "Lax"),
 	}
 }
 
 func envOrDefault(key, fallback string) string {
 	if val := os.Getenv(key); val != "" {
 		return val
+	}
+	return fallback
+}
+
+func envOrDefaultBool(key string, fallback bool) bool {
+	if val := os.Getenv(key); val != "" {
+		if parsed, err := strconv.ParseBool(val); err == nil {
+			return parsed
+		}
 	}
 	return fallback
 }

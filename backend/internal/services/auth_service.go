@@ -168,3 +168,11 @@ func (s *AuthService) generateAndPersistTokens(user *models.User) (AuthTokens, e
 		RefreshTokenExpiry: refreshExp,
 	}, nil
 }
+
+func (s *AuthService) RevokeTokens(userID int64) error {
+	return s.repo.DeleteTokensForUser(userID)
+}
+
+func (s *AuthService) GetUserByID(userID int64) (*models.User, error) {
+	return s.repo.GetByID(userID)
+}

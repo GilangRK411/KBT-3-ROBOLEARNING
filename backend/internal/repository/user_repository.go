@@ -133,3 +133,11 @@ func (r *UserRepository) GetAccessToken(token string) (*models.AccessToken, erro
 	}
 	return &at, nil
 }
+
+func (r *UserRepository) DeleteTokensForUser(userID int64) error {
+	if _, err := r.db.Exec(`DELETE FROM users_access_token WHERE user_id = $1`, userID); err != nil {
+		return err
+	}
+	_, err := r.db.Exec(`DELETE FROM users_refresh_token WHERE user_id = $1`, userID)
+	return err
+}

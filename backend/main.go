@@ -8,6 +8,7 @@ import (
 	"robolearning/config"
 	"robolearning/internal/database"
 	"robolearning/internal/handlers"
+	"robolearning/internal/middleware"
 	"robolearning/internal/repository"
 	"robolearning/internal/routes"
 	"robolearning/internal/services"
@@ -26,10 +27,11 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	tokenMaker := token.NewJWTMaker(cfg.JWTSecret)
 	authService := services.NewAuthService(userRepo, tokenMaker, cfg)
-	authHandler := handlers.NewAuthHandler(authService)
+	authHandler := handlers.NewAuthHandler(authService, cfg)
+	authMiddleware := middleware.AuthMiddleware(tokenMaker, userRepo)
 
 	router := gin.Default()
-	routes.RegisterRoutes(router, authHandler)
+	routes.RegisterRoutes(router, authHandler, authMiddleware)
 
 	addr := ":" + cfg.ServerPort
 	if err := router.Run(addr); err != nil {
