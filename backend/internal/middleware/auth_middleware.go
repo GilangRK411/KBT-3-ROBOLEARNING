@@ -14,49 +14,56 @@ import (
 
 const ContextUserIDKey = "userID"
 
-// AuthMiddleware validates JWT access tokens and ensures they are still stored and unexpired.
 func AuthMiddleware(tokenMaker *token.JWTMaker, repo *repository.UserRepository) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		raw, err := c.Cookie("access_token")
-		if err != nil || raw == "" {
-			authHeader := c.GetHeader("Authorization")
-			if strings.HasPrefix(authHeader, "Bearer ") {
-				raw = strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
-			}
-		}
+    return func(c *gin.Context) {
 
-		if raw == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing access token"})
-			return
-		}
+        // Izinkan preflight tanpa autentikasi
+        if c.Request.Method == http.MethodOptions {
+            c.Next()
+            return
+        }
 
-		claims, err := tokenMaker.VerifyAccessToken(raw)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
-			return
-		}
+        raw, err := c.Cookie("access_token")
+        if err != nil || raw == "" {
+            authHeader := c.GetHeader("Authorization")
+            if strings.HasPrefix(authHeader, "Bearer ") {
+                raw = strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+            }
+        }
 
-		userID, err := claimToInt64(claims["user_id"])
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token payload"})
-			return
-		}
+        if raw == "" {
+            c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing access token"})
+            return
+        }
 
-		accessRecord, err := repo.GetAccessToken(raw)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "token not recognized"})
-			return
-		}
+        claims, err := tokenMaker.VerifyAccessToken(raw)
+        if err != nil {
+            c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+            return
+        }
 
-		if time.Now().UTC().After(accessRecord.ExpiresAt) {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "token expired"})
-			return
-		}
+        userID, err := claimToInt64(claims["user_id"])
+        if err != nil {
+            c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token payload"})
+            return
+        }
 
-		c.Set(ContextUserIDKey, userID)
-		c.Next()
-	}
+        accessRecord, err := repo.GetAccessToken(raw)
+        if err != nil {
+            c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "token not recognized"})
+            return
+        }
+
+        if time.Now().UTC().After(accessRecord.ExpiresAt) {
+            c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "token expired"})
+            return
+        }
+
+        c.Set(ContextUserIDKey, userID)
+        c.Next()
+    }
 }
+
 
 func claimToInt64(val interface{}) (int64, error) {
 	switch v := val.(type) {

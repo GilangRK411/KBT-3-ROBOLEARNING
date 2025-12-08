@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -21,6 +22,7 @@ type Config struct {
 	CookieDomain    string
 	CookieSecure    bool
 	CookieSameSite  string
+	CORSOrigins     []string
 }
 
 // Load reads configuration from environment variables and applies safe defaults.
@@ -39,6 +41,7 @@ func Load() Config {
 		CookieDomain:    envOrDefault("COOKIE_DOMAIN", ""),
 		CookieSecure:    envOrDefaultBool("COOKIE_SECURE", true), // default secure for HTTPS; override to false for local HTTP
 		CookieSameSite:  envOrDefault("COOKIE_SAME_SITE", "Lax"),
+		CORSOrigins:     parseCSV(envOrDefault("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")),
 	}
 }
 
@@ -56,4 +59,18 @@ func envOrDefaultBool(key string, fallback bool) bool {
 		}
 	}
 	return fallback
+}
+
+func parseCSV(val string) []string {
+	parts := strings.Split(val, ",")
+	var out []string
+	for _, p := range parts {
+		if trimmed := strings.TrimSpace(p); trimmed != "" {
+			out = append(out, trimmed)
+		}
+	}
+	if len(out) == 0 {
+		return []string{"*"}
+	}
+	return out
 }
