@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { WEB_ROUTES } from "@/config/page-endpoint-config";
 import { useAuth } from "@/config/context/auth-context";
 
 export default function RegisterForm() {
@@ -22,7 +23,7 @@ export default function RegisterForm() {
     setLocalError(null);
     try {
       await register(form);
-      router.push("/");
+      router.push(WEB_ROUTES.protectedHome.path);
     } catch (err: any) {
       setLocalError(err?.message || "Register gagal");
     }

@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-
+import { WEB_ROUTES } from "@/config/page-endpoint-config";
 import { useAuth } from "@/config/context/auth-context";
 
 export default function LoginForm() {
@@ -19,7 +19,7 @@ export default function LoginForm() {
     try {
       await login({ identifier, password });
       const next = searchParams.get("next");
-      router.push(next || "/");
+      router.push(next || WEB_ROUTES.protectedHome.path);
     } catch (err: any) {
       setLocalError(err?.message || "Login gagal");
     }

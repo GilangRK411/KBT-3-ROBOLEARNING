@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { WEB_ROUTES } from "@/config/page-endpoint-config";
 import { useAuth } from "@/config/context/auth-context";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -13,7 +14,8 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!loading && !user) {
       const next = searchParams.get("next");
-      const redirect = next ? `/login?next=${encodeURIComponent(next)}` : "/login";
+      const baseLogin = WEB_ROUTES.login.path;
+      const redirect = next ? `${baseLogin}?next=${encodeURIComponent(next)}` : baseLogin;
       router.replace(redirect);
     }
   }, [loading, user, router, searchParams]);

@@ -1,3 +1,5 @@
+import { AUTH_API_ENDPOINTS } from "@/config/api-endpoints";
+
 import { api } from "../../lib/client";
 
 export type User = {
@@ -22,7 +24,7 @@ async function parseJsonOrThrow(res: Response): Promise<any> {
 }
 
 export async function login(payload: { identifier: string; password: string }) {
-  const res = await api("/login", {
+  const res = await api(AUTH_API_ENDPOINTS.login.path, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -41,7 +43,7 @@ export async function register(payload: {
   email: string;
   password: string;
 }) {
-  const res = await api("/register", {
+  const res = await api(AUTH_API_ENDPOINTS.register.path, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -54,7 +56,7 @@ export async function register(payload: {
 }
 
 export async function me() {
-  const res = await api("/me", { method: "GET" }, false);
+  const res = await api(AUTH_API_ENDPOINTS.me.path, { method: "GET" }, false);
   if (!res.ok) {
     throw new Error("Not authenticated");
   }
@@ -62,5 +64,5 @@ export async function me() {
 }
 
 export async function logout() {
-  await api("/logout", { method: "POST" }, false).catch(() => {});
+  await api(AUTH_API_ENDPOINTS.logout.path, { method: "POST" }, false).catch(() => {});
 }
