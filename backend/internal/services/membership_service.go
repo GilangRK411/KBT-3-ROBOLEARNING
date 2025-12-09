@@ -15,6 +15,9 @@ var (
 	ErrPlanNotFound       = errors.New("membership plan not found")
 	ErrNoActiveMembership = errors.New("no active membership")
 	ErrInvalidPlanInput   = errors.New("invalid plan input")
+	ErrSessionNotFound    = errors.New("checkout session not found")
+	ErrSessionExpired     = errors.New("checkout session expired")
+	ErrSessionNotPending  = errors.New("checkout session not pending")
 )
 
 type MembershipService struct {
@@ -120,4 +123,62 @@ func planNumberToCode(n int) (string, bool) {
 	default:
 		return "", false
 	}
+}
+
+// Checkout sessions
+
+const checkoutTTL = 30 * time.Minute
+
+func (s *MembershipService) CreateCheckoutSession(userID int64, planCode string) (*models.CheckoutSession, error) {
+	if err := s.ensurePlans(); err != nil {
+		return nil, err
+	}
+
+	plan, err := s.repo.GetPlanByCode(planCode)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrPlanNotFound
+		}
+		return nil, err
+	}
+
+	expiresAt := time.Now().Add(checkoutTTL)
+	return s.repo.CreateCheckoutSession(userID, plan.Code, plan.PriceIDR, expiresAt)
+}
+
+func (s *MembershipService) GetCheckoutSession(id int64) (*models.CheckoutSession, error) {
+	cs, err := s.repo.GetCheckoutSession(id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrSessionNotFound
+		}
+		return nil, err
+	}
+	return cs, nil
+}
+
+func (s *MembershipService) ConfirmCheckoutSession(sessionID, userID int64) (*models.UserMembership, error) {
+	cs, err := s.GetCheckoutSession(sessionID)
+	if err != nil {
+		return nil, err
+	}
+
+	if cs.UserID != userID {
+		return nil, ErrSessionNotFound
+	}
+	if cs.Status != "pending" {
+		return nil, ErrSessionNotPending
+	}
+	if time.Now().After(cs.ExpiresAt) {
+		_ = s.repo.ExpireCheckoutSession(sessionID)
+		return nil, ErrSessionExpired
+	}
+
+	membership, err := s.Subscribe(userID, cs.PlanCode)
+	if err != nil {
+		return nil, err
+	}
+
+	_ = s.repo.MarkCheckoutSessionPaid(sessionID)
+	return membership, nil
 }

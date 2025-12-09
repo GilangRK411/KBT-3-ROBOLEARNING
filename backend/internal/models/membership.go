@@ -21,3 +21,15 @@ type UserMembership struct {
 	CreatedAt time.Time
 	Plan      *MembershipPlan
 }
+
+// CheckoutSession represents a pending checkout before activating membership.
+type CheckoutSession struct {
+	ID        int64
+	UserID    int64
+	PlanCode  string
+	AmountIDR int64
+	Status    string
+	ExpiresAt time.Time
+	CreatedAt time.Time
+	PaidAt    *time.Time
+}

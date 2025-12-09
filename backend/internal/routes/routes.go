@@ -27,6 +27,8 @@ func RegisterRoutes(
 		protected.GET("/me", authHandler.Me)
 
 		protected.GET("/memberships/me", membershipHandler.MyMembership)
+		protected.POST("/memberships/checkout", membershipHandler.CreateCheckout)
+		protected.POST("/memberships/checkout/:id/confirm", membershipHandler.ConfirmCheckout)
 		protected.POST("/memberships/subscribe", membershipHandler.Subscribe)
 		protected.GET("/memberships/plan/:plan", membershipHandler.GetPlan)
 		protected.GET("/memberships/verify", membershipMiddleware, membershipHandler.MyMembership)

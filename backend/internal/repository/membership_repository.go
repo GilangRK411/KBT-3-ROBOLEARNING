@@ -15,6 +15,54 @@ func NewMembershipRepository(db *sql.DB) *MembershipRepository {
 	return &MembershipRepository{db: db}
 }
 
+// Checkout sessions
+func (r *MembershipRepository) CreateCheckoutSession(userID int64, planCode string, amount int64, expiresAt time.Time) (*models.CheckoutSession, error) {
+	var cs models.CheckoutSession
+	err := r.db.QueryRow(`
+		INSERT INTO membership_checkout_sessions (user_id, plan_code, amount_idr, status, expires_at)
+		VALUES ($1, $2, $3, 'pending', $4)
+		RETURNING id, user_id, plan_code, amount_idr, status, expires_at, created_at, paid_at;
+	`, userID, planCode, amount, expiresAt).
+		Scan(&cs.ID, &cs.UserID, &cs.PlanCode, &cs.AmountIDR, &cs.Status, &cs.ExpiresAt, &cs.CreatedAt, &cs.PaidAt)
+	if err != nil {
+		return nil, err
+	}
+	return &cs, nil
+}
+
+func (r *MembershipRepository) GetCheckoutSession(id int64) (*models.CheckoutSession, error) {
+	var cs models.CheckoutSession
+	err := r.db.QueryRow(`
+		SELECT id, user_id, plan_code, amount_idr, status, expires_at, created_at, paid_at
+		FROM membership_checkout_sessions
+		WHERE id = $1
+		LIMIT 1;
+	`, id).
+		Scan(&cs.ID, &cs.UserID, &cs.PlanCode, &cs.AmountIDR, &cs.Status, &cs.ExpiresAt, &cs.CreatedAt, &cs.PaidAt)
+	if err != nil {
+		return nil, err
+	}
+	return &cs, nil
+}
+
+func (r *MembershipRepository) MarkCheckoutSessionPaid(id int64) error {
+	_, err := r.db.Exec(`
+		UPDATE membership_checkout_sessions
+		SET status = 'paid', paid_at = now()
+		WHERE id = $1;
+	`, id)
+	return err
+}
+
+func (r *MembershipRepository) ExpireCheckoutSession(id int64) error {
+	_, err := r.db.Exec(`
+		UPDATE membership_checkout_sessions
+		SET status = 'expired'
+		WHERE id = $1;
+	`, id)
+	return err
+}
+
 func (r *MembershipRepository) ListPlans() ([]models.MembershipPlan, error) {
 	rows, err := r.db.Query(`
 		SELECT id, code, name, duration_days, price_idr, created_at

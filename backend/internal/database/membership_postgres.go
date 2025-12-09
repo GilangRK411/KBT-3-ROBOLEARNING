@@ -12,6 +12,19 @@ func createMembershipTables(db *sql.DB) error {
 			price_idr BIGINT NOT NULL,
 			created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 		);`,
+		`CREATE TABLE IF NOT EXISTS membership_checkout_sessions (
+			id SERIAL PRIMARY KEY,
+			user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+			plan_code TEXT NOT NULL,
+			amount_idr BIGINT NOT NULL,
+			status TEXT NOT NULL DEFAULT 'pending',
+			expires_at TIMESTAMPTZ NOT NULL,
+			created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+			paid_at TIMESTAMPTZ
+		);`,
+		`CREATE INDEX IF NOT EXISTS idx_membership_checkout_sessions_user ON membership_checkout_sessions(user_id);`,
+		`CREATE INDEX IF NOT EXISTS idx_membership_checkout_sessions_status ON membership_checkout_sessions(status);`,
+		`CREATE INDEX IF NOT EXISTS idx_membership_checkout_sessions_expires ON membership_checkout_sessions(expires_at);`,
 		`CREATE TABLE IF NOT EXISTS users_membership_plans (
 			id SERIAL PRIMARY KEY,
 			user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
