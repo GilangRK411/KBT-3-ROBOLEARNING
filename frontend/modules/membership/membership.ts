@@ -84,3 +84,15 @@ export async function confirmCheckout(sessionId: number): Promise<Membership> {
   const data = (await res.json()) as { membership: Membership };
   return data.membership;
 }
+
+export async function getMyMembership(): Promise<Membership | null> {
+  const res = await api(MEMBERSHIP_API_ENDPOINTS.myMembership.path, {
+    method: MEMBERSHIP_API_ENDPOINTS.myMembership.method,
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    throw new Error("Gagal memuat membership aktif");
+  }
+  const data = (await res.json()) as { membership: Membership | null };
+  return data.membership ?? null;
+}

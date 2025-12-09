@@ -17,6 +17,12 @@ export const PROTECTED_ROUTES = {
   },
 } as const;
 
+// Membership-protected paths (must be logged in + have membership)
+export const MEMBERSHIP_REQUIRED_ROUTES = [
+  PROTECTED_ROUTES.classes.iot,
+  PROTECTED_ROUTES.classes.robotik,
+] as const;
+
 // ==================== Route Builders ====================
 export const RouteBuilder = {
   checkout: (plan: number | string) => 
@@ -61,6 +67,20 @@ export const WEB_ROUTES: Record<string, RouteConfig> = {
     requiresAuth: true,
     redirectOnLocked: PUBLIC_ROUTES.login,
   },
+  classIot: {
+    path: PROTECTED_ROUTES.classes.iot,
+    label: "Kelas IoT",
+    requiresAuth: true,
+    requiresMembership: true,
+    redirectOnLocked: PUBLIC_ROUTES.login,
+  },
+  classRobotik: {
+    path: PROTECTED_ROUTES.classes.robotik,
+    label: "Kelas Robotik",
+    requiresAuth: true,
+    requiresMembership: true,
+    redirectOnLocked: PUBLIC_ROUTES.login,
+  },
 };
 
 // ==================== Helper Functions ====================
@@ -73,4 +93,7 @@ export const RouteHelpers = {
   
   getRouteConfig: (key: keyof typeof WEB_ROUTES) => 
     WEB_ROUTES[key],
+
+  requiresMembership: (path: string) =>
+    MEMBERSHIP_REQUIRED_ROUTES.includes(path as (typeof MEMBERSHIP_REQUIRED_ROUTES)[number]),
 } as const;

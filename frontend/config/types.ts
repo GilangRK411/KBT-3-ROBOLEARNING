@@ -11,6 +11,7 @@ export type RouteConfig = {
   path: string;
   label?: string;
   requiresAuth?: boolean;
+  requiresMembership?: boolean;
   lockedMessage?: string;
   redirectOnLocked?: string;
 };
