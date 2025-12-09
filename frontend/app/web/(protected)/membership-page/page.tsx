@@ -1,57 +1,93 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import NavigationBar from "../main-page/partials/navigation-bar";
-import { useAuth } from "@/config/context/auth-context";
+import { useAuth } from "@/modules/auth/context/auth-context";
 import type { Membership } from "@/modules/auth/auth";
+import { fetchMembershipPlans, type MembershipPlan } from "@/modules/membership/membership";
+import { PROTECTED_ROUTES, buildCheckoutUrl } from "../protected";
 
-const plans = [
-  {
-    code: "monthly",
-    title: "Membership 1 Bulan",
-    price: 500_000,
-    note: "Paket fleksibel · coba dulu",
+type PlanView = MembershipPlan & {
+  number: number;
+  tag: string;
+  note: string;
+  features: string[];
+  displayName: string;
+};
+
+const planMeta: Record<string, { number: number; tag: string; note: string; features: string[] }> = {
+  monthly: {
+    number: 1,
     tag: "Coba dulu",
+    note: "Paket fleksibel - coba dulu",
     features: [
       "Semua kelas IoT & robotika + rekaman",
       "Simulasi cloud lab & modul coding",
       "1x sesi mentor check-in dan review proyek",
     ],
   },
-  {
-    code: "quarterly",
-    title: "Membership 3 Bulan",
-    price: 1_350_000,
-    note: "Hemat 10% · ritme belajar stabil",
+  quarterly: {
+    number: 2,
     tag: "Paling diminati",
+    note: "Hemat 10% - ritme belajar stabil",
     features: [
       "Semua kelas + live cohort & challenge",
       "Simulasi cloud lab & kit sharing",
       "4x mentor check-in + forum diskusi",
     ],
   },
-  {
-    code: "semiannual",
-    title: "Membership 6 Bulan",
-    price: 2_400_000,
-    note: "Hemat 20% · fokus sampai finish",
+  semiannual: {
+    number: 3,
     tag: "Serius upgrade",
+    note: "Hemat 20% - fokus sampai finish",
     features: [
       "Akses semua kelas & update materi baru",
       "Simulasi cloud lab + proyek tematik",
       "Coaching mingguan, career prep, prioritas support",
     ],
   },
-];
+};
 
 export default function MembershipPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, loading, refreshProfile } = useAuth();
   const membership = (user?.membership as Membership | null) ?? null;
   const endsAt = membership?.ends_at ? formatDate(membership.ends_at) : null;
+  const selectedPlanNumber = planNumberFromParam(searchParams.get("plan"));
+  const [plans, setPlans] = useState<PlanView[]>([]);
+  const [loadingPlans, setLoadingPlans] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSelect = (planCode: string) => {
-    router.push(`/web/checkout-page?plan=${planCode}`);
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      setLoadingPlans(true);
+      setError(null);
+      try {
+        const apiPlans = await fetchMembershipPlans();
+        if (cancelled) return;
+        const enriched = apiPlans
+          .map((plan) => mergePlan(plan))
+          .sort((a, b) => (a.number || 99) - (b.number || 99));
+        setPlans(enriched);
+      } catch (err: any) {
+        if (!cancelled) {
+          setError(err?.message || "Gagal memuat paket");
+        }
+      } finally {
+        if (!cancelled) setLoadingPlans(false);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleSelect = (planNumber: number) => {
+    router.push(buildCheckoutUrl(planNumber));
   };
 
   return (
@@ -109,7 +145,7 @@ export default function MembershipPage() {
               </ul>
               <button
                 className="w-full rounded-full bg-[#D72323] px-5 py-2 text-xs font-semibold text-white shadow transition hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D72323]"
-                onClick={() => router.push("/web/main-page")}
+                onClick={() => router.push(PROTECTED_ROUTES.main)}
               >
                 Kembali ke Dashboard
               </button>
@@ -123,23 +159,28 @@ export default function MembershipPage() {
             <span>Pilih paket langganan</span>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
-            {plans.map((plan) => {
-              const isActive = membership?.plan?.code === plan.code;
-              return (
-                <PlanCard
-                  key={plan.code}
-                  plan={plan}
-                  isActive={!!isActive}
-                  onSelect={() => handleSelect(plan.code)}
-                />
-              );
-            })}
+            {loadingPlans ? (
+              <PlanSkeletons />
+            ) : error ? (
+              <p className="text-sm text-red-600">{error}</p>
+            ) : (
+              plans.map((plan) => {
+                const isActive = membership?.plan?.code === plan.code;
+                const isSelected = selectedPlanNumber === plan.number;
+                return (
+                  <PlanCard
+                    key={plan.code}
+                    plan={plan}
+                    isActive={!!isActive}
+                    isSelected={isSelected}
+                    onSelect={() => handleSelect(plan.number)}
+                  />
+                );
+              })
+            )}
           </div>
         </section>
       </main>
-
-      <div className="mx-auto max-w-screen-xl px-4 pb-12">
-      </div>
     </div>
   );
 }
@@ -161,7 +202,7 @@ function StatusCard({
         <p className="text-sm font-semibold text-[#000000]">Status Langganan</p>
         {membership ? (
           <p>
-            {membership.plan?.name ?? "Membership aktif"} · berlaku sampai {endsAt ?? "-"}
+            {membership.plan?.name ?? "Membership aktif"} - berlaku sampai {endsAt ?? "-"}
           </p>
         ) : (
           <p>Belum ada langganan aktif. Pilih paket untuk mulai belajar.</p>
@@ -181,28 +222,34 @@ function StatusCard({
 function PlanCard({
   plan,
   isActive,
+  isSelected,
   onSelect,
 }: {
-  plan: (typeof plans)[number];
+  plan: PlanView;
   isActive: boolean;
+  isSelected: boolean;
   onSelect: () => void;
 }) {
   return (
     <div
       className={`flex h-full flex-col gap-3 rounded-2xl border bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg ${
-        isActive ? "border-[#D72323]/50 shadow-md" : "border-[#F5EDED]"
+        isActive || isSelected ? "border-[#D72323]/50 shadow-md" : "border-[#F5EDED]"
       }`}
     >
       <div className="flex items-start justify-between">
         <div className="space-y-1">
-          <p className="text-sm font-semibold text-[#000000]">{plan.title}</p>
+          <p className="text-sm font-semibold text-[#000000]">{plan.displayName}</p>
           <p className="text-xs text-[#3E3636]">{plan.note}</p>
           <span
             className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-[11px] font-semibold ${
-              isActive ? "bg-[#D72323]/10 text-[#D72323]" : "bg-[#F5EDED] text-[#3E3636]"
+              isActive
+                ? "bg-[#D72323]/10 text-[#D72323]"
+                : isSelected
+                ? "bg-[#F5EDED] text-[#D72323]"
+                : "bg-[#F5EDED] text-[#3E3636]"
             }`}
           >
-            {isActive ? "Aktif" : plan.tag}
+            {isActive ? "Aktif" : isSelected ? "Dipilih" : plan.tag}
           </span>
         </div>
         <span className="rounded-full bg-[#D72323]/10 px-3 py-1 text-[11px] font-semibold text-[#D72323]">
@@ -211,8 +258,10 @@ function PlanCard({
       </div>
 
       <div className="space-y-2">
-        <p className="text-lg font-bold text-[#D72323]">Rp {plan.price.toLocaleString("id-ID")}</p>
-        <p className="text-xs text-[#3E3636]">Termasuk semua kelas + sesi live</p>
+        <p className="text-lg font-bold text-[#D72323]">
+          Rp {plan.price_idr.toLocaleString("id-ID")}
+        </p>
+        <p className="text-xs text-[#3E3636]">Durasi {plan.duration_days} hari · All Access</p>
       </div>
 
       <ul className="space-y-2 rounded-2xl border border-[#F5EDED] bg-[#F5EDED]/60 p-3 text-sm text-[#3E3636]">
@@ -250,3 +299,56 @@ function formatDate(value?: string) {
   });
 }
 
+function planNumberFromParam(value: string | null): number | null {
+  if (!value) return null;
+  const parsed = Number(value);
+  if (parsed === 1 || parsed === 2 || parsed === 3) {
+    return parsed;
+  }
+  return null;
+}
+
+function mergePlan(plan: MembershipPlan): PlanView {
+  const meta = planMeta[plan.code] || { number: 0, tag: "", note: "", features: [] };
+  return {
+    ...plan,
+    number: meta.number || codeToNumber(plan.code) || 0,
+    tag: meta.tag || "All Access",
+    note: meta.note || "",
+    features: meta.features || [],
+    displayName: plan.name,
+  };
+}
+
+function codeToNumber(code: string): number | null {
+  switch (code) {
+  case "monthly":
+    return 1;
+  case "quarterly":
+    return 2;
+  case "semiannual":
+    return 3;
+  default:
+    return null;
+  }
+}
+
+function PlanSkeletons() {
+  const items = [1, 2, 3];
+  return (
+    <>
+      {items.map((id) => (
+        <div
+          key={id}
+          className="flex h-full flex-col gap-3 rounded-2xl border border-[#F5EDED] bg-white p-5 shadow-sm"
+        >
+          <div className="h-4 w-1/2 animate-pulse rounded bg-[#F5EDED]" />
+          <div className="h-3 w-2/3 animate-pulse rounded bg-[#F5EDED]" />
+          <div className="h-10 w-full animate-pulse rounded bg-[#F5EDED]" />
+          <div className="h-24 w-full animate-pulse rounded bg-[#F5EDED]" />
+          <div className="h-8 w-1/2 animate-pulse rounded bg-[#F5EDED]" />
+        </div>
+      ))}
+    </>
+  );
+}

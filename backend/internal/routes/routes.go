@@ -18,6 +18,7 @@ func RegisterRoutes(
 		api.POST("/register", authHandler.Register)
 		api.POST("/login", authHandler.Login)
 		api.POST("/refresh", authHandler.Refresh)
+		api.GET("/memberships/plans", membershipHandler.ListPlans)
 	}
 
 	protected := api.Group("/")

@@ -4,7 +4,7 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { WEB_ROUTES } from "@/config/page-endpoint-config";
-import { useAuth } from "@/config/context/auth-context";
+import { useAuth } from "@/modules/auth/context/auth-context";
 
 export default function RegisterForm() {
   const router = useRouter();

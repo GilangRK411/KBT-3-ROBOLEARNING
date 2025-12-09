@@ -67,6 +67,13 @@ func (s *MembershipService) GetActiveMembership(userID int64) (*models.UserMembe
 	return membership, nil
 }
 
+func (s *MembershipService) ListPlans() ([]models.MembershipPlan, error) {
+	if err := s.ensurePlans(); err != nil {
+		return nil, err
+	}
+	return s.repo.ListPlans()
+}
+
 func (s *MembershipService) ensurePlans() error {
 	if s.controller == nil {
 		return nil
@@ -74,7 +81,7 @@ func (s *MembershipService) ensurePlans() error {
 	return s.controller.EnsureDefaultPlans()
 }
 
-// ResolvePlanCode accepts either direct plan code or numeric plan (1/2/3) and returns canonical code.
+
 func (s *MembershipService) ResolvePlanCode(planCode string, planNumber int) (string, error) {
 	if planCode != "" {
 		return planCode, nil
@@ -87,21 +94,16 @@ func (s *MembershipService) ResolvePlanCode(planCode string, planNumber int) (st
 	return code, nil
 }
 
-// GetPlanByInput resolves plan from path/query input (code or number).
 func (s *MembershipService) GetPlanByInput(input string) (*models.MembershipPlan, error) {
 	if err := s.ensurePlans(); err != nil {
 		return nil, err
 	}
-
-	// try numeric
 	if n, err := strconv.Atoi(input); err == nil {
 		if code, ok := planNumberToCode(n); ok {
 			return s.repo.GetPlanByCode(code)
 		}
 		return nil, ErrInvalidPlanInput
 	}
-
-	// fallback code
 	plan, err := s.repo.GetPlanByCode(input)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -124,8 +126,6 @@ func planNumberToCode(n int) (string, bool) {
 		return "", false
 	}
 }
-
-// Checkout sessions
 
 const checkoutTTL = 30 * time.Minute
 

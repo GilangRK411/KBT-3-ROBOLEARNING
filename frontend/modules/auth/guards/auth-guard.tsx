@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { WEB_ROUTES } from "@/config/page-endpoint-config";
-import { useAuth } from "@/config/context/auth-context";
+import { useAuth } from "@/modules/auth/context/auth-context";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();

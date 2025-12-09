@@ -226,6 +226,20 @@ func buildPlanResponse(p models.MembershipPlan) gin.H {
 	}
 }
 
+func (h *MembershipHandler) ListPlans(c *gin.Context) {
+	plans, err := h.membershipService.ListPlans()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load plans"})
+		return
+	}
+
+	resp := make([]gin.H, 0, len(plans))
+	for _, p := range plans {
+		resp = append(resp, buildPlanResponse(p))
+	}
+	c.JSON(http.StatusOK, gin.H{"plans": resp})
+}
+
 func buildCheckoutSessionResponse(cs *models.CheckoutSession) gin.H {
 	if cs == nil {
 		return nil

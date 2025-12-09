@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "@/config/context/auth-context";
+import { useAuth } from "@/modules/auth/context/auth-context";
 import type { Membership } from "@/modules/auth/auth";
 import { useRouter } from "next/navigation";
+import { PROTECTED_ROUTES } from "../../protected";
 
 export type PackageItem = {
   icon: string;
@@ -83,7 +84,7 @@ export default function PackagesSection({ packages }: { packages: PackageItem[] 
                 if (membership) {
                   refreshProfile().catch(() => {});
                 } else {
-                  router.push("/web/membership-page");
+                  router.push(PROTECTED_ROUTES.membership);
                 }
               }}
               disabled={loading}
@@ -114,7 +115,7 @@ export default function PackagesSection({ packages }: { packages: PackageItem[] 
               >
                 {packages.map((item) => (
                   <div key={item.title} className="w-full flex-shrink-0 px-1 py-1">
-                    <PackageCard item={item} onSelect={() => router.push("/web/membership-page")} />
+                    <PackageCard item={item} onSelect={() => router.push(PROTECTED_ROUTES.membership)} />
                   </div>
                 ))}
               </div>
