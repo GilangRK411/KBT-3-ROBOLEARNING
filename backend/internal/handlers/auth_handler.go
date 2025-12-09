@@ -19,14 +19,16 @@ const (
 )
 
 type AuthHandler struct {
-	authService *services.AuthService
-	cfg         config.Config
+	authService       *services.AuthService
+	membershipService *services.MembershipService
+	cfg               config.Config
 }
 
-func NewAuthHandler(authService *services.AuthService, cfg config.Config) *AuthHandler {
+func NewAuthHandler(authService *services.AuthService, membershipService *services.MembershipService, cfg config.Config) *AuthHandler {
 	return &AuthHandler{
-		authService: authService,
-		cfg:         cfg,
+		authService:       authService,
+		membershipService: membershipService,
+		cfg:               cfg,
 	}
 }
 
@@ -78,7 +80,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	h.setAuthCookies(c, tokens)
-	c.JSON(http.StatusCreated, buildAuthResponse(user, tokens))
+	c.JSON(http.StatusCreated, h.buildAuthResponse(user, tokens))
 }
 
 func (h *AuthHandler) Login(c *gin.Context) {
@@ -100,7 +102,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	h.setAuthCookies(c, tokens)
-	c.JSON(http.StatusOK, buildAuthResponse(user, tokens))
+	c.JSON(http.StatusOK, h.buildAuthResponse(user, tokens))
 }
 
 func (h *AuthHandler) Refresh(c *gin.Context) {
@@ -126,7 +128,7 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 	}
 
 	h.setAuthCookies(c, tokens)
-	c.JSON(http.StatusOK, buildAuthResponse(user, tokens))
+	c.JSON(http.StatusOK, h.buildAuthResponse(user, tokens))
 }
 
 func (h *AuthHandler) Logout(c *gin.Context) {
@@ -161,12 +163,14 @@ func (h *AuthHandler) Me(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user": buildUserResponse(user)})
+	membership := h.getMembership(userID)
+	c.JSON(http.StatusOK, gin.H{"user": buildUserResponse(user, membership)})
 }
 
-func buildAuthResponse(user *models.User, tokens services.AuthTokens) gin.H {
+func (h *AuthHandler) buildAuthResponse(user *models.User, tokens services.AuthTokens) gin.H {
+	membership := h.getMembership(user.ID)
 	return gin.H{
-		"user":                     buildUserResponse(user),
+		"user":                     buildUserResponse(user, membership),
 		"access_token":             tokens.AccessToken,
 		"access_token_expires_at":  tokens.AccessTokenExpiry,
 		"refresh_token":            tokens.RefreshToken,
@@ -174,7 +178,7 @@ func buildAuthResponse(user *models.User, tokens services.AuthTokens) gin.H {
 	}
 }
 
-func buildUserResponse(user *models.User) gin.H {
+func buildUserResponse(user *models.User, membership *models.UserMembership) gin.H {
 	birthdate := ""
 	if !user.Birthdate.IsZero() {
 		birthdate = user.Birthdate.Format("2006-01-02")
@@ -185,7 +189,19 @@ func buildUserResponse(user *models.User) gin.H {
 		"username":  user.Username,
 		"birthdate": birthdate,
 		"email":     user.Email,
+		"membership": BuildMembershipResponse(membership),
 	}
+}
+
+func (h *AuthHandler) getMembership(userID int64) *models.UserMembership {
+	if h.membershipService == nil {
+		return nil
+	}
+	membership, err := h.membershipService.GetActiveMembership(userID)
+	if err != nil {
+		return nil
+	}
+	return membership
 }
 
 func (h *AuthHandler) setAuthCookies(c *gin.Context, tokens services.AuthTokens) {

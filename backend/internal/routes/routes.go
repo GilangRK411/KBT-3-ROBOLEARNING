@@ -6,7 +6,13 @@ import (
 	"robolearning/internal/handlers"
 )
 
-func RegisterRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, authMiddleware gin.HandlerFunc) {
+func RegisterRoutes(
+	router *gin.Engine,
+	authHandler *handlers.AuthHandler,
+	membershipHandler *handlers.MembershipHandler,
+	authMiddleware gin.HandlerFunc,
+	membershipMiddleware gin.HandlerFunc,
+) {
 	api := router.Group("/api")
 	{
 		api.POST("/register", authHandler.Register)
@@ -19,5 +25,10 @@ func RegisterRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, authM
 	{
 		protected.POST("/logout", authHandler.Logout)
 		protected.GET("/me", authHandler.Me)
+
+		protected.GET("/memberships/me", membershipHandler.MyMembership)
+		protected.POST("/memberships/subscribe", membershipHandler.Subscribe)
+		protected.GET("/memberships/plan/:plan", membershipHandler.GetPlan)
+		protected.GET("/memberships/verify", membershipMiddleware, membershipHandler.MyMembership)
 	}
 }

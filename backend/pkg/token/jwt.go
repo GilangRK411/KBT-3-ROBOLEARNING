@@ -18,7 +18,7 @@ func NewJWTMaker(secret string) *JWTMaker {
 	return &JWTMaker{secret: []byte(secret)}
 }
 
-func (m *JWTMaker) GenerateAccessToken(userID int64, username string, ttl time.Duration) (string, time.Time, error) {
+func (m *JWTMaker) GenerateAccessToken(userID int64, username string, ttl time.Duration, extraClaims map[string]interface{}) (string, time.Time, error) {
 	now := time.Now().UTC()
 	expiresAt := now.Add(ttl)
 
@@ -28,6 +28,10 @@ func (m *JWTMaker) GenerateAccessToken(userID int64, username string, ttl time.D
 		"username": username,
 		"iat":      now.Unix(),
 		"exp":      expiresAt.Unix(),
+	}
+
+	for k, v := range extraClaims {
+		claims[k] = v
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

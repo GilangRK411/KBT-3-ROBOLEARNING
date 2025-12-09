@@ -26,16 +26,18 @@ type AuthTokens struct {
 }
 
 type AuthService struct {
-	repo   *repository.UserRepository
-	tokens *token.JWTMaker
-	cfg    config.Config
+	repo           *repository.UserRepository
+	membershipRepo *repository.MembershipRepository
+	tokens         *token.JWTMaker
+	cfg            config.Config
 }
 
-func NewAuthService(repo *repository.UserRepository, maker *token.JWTMaker, cfg config.Config) *AuthService {
+func NewAuthService(repo *repository.UserRepository, membershipRepo *repository.MembershipRepository, maker *token.JWTMaker, cfg config.Config) *AuthService {
 	return &AuthService{
-		repo:   repo,
-		tokens: maker,
-		cfg:    cfg,
+		repo:           repo,
+		membershipRepo: membershipRepo,
+		tokens:         maker,
+		cfg:            cfg,
 	}
 }
 
@@ -144,7 +146,17 @@ func (s *AuthService) Refresh(refreshToken string) (*models.User, AuthTokens, er
 }
 
 func (s *AuthService) generateAndPersistTokens(user *models.User) (AuthTokens, error) {
-	accessToken, accessExp, err := s.tokens.GenerateAccessToken(user.ID, user.Username, s.cfg.AccessTokenTTL)
+	var extraClaims map[string]interface{}
+	if s.membershipRepo != nil {
+		if membership, err := s.membershipRepo.GetActiveMembershipWithPlan(user.ID); err == nil && membership.Plan != nil {
+			extraClaims = map[string]interface{}{
+				"membership_plan":       membership.Plan.Code,
+				"membership_expires_at": membership.EndsAt.Unix(),
+			}
+		}
+	}
+
+	accessToken, accessExp, err := s.tokens.GenerateAccessToken(user.ID, user.Username, s.cfg.AccessTokenTTL, extraClaims)
 	if err != nil {
 		return AuthTokens{}, err
 	}

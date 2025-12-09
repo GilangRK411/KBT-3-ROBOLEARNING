@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"robolearning/config"
+	"robolearning/internal/controllers"
 	"robolearning/internal/database"
 	"robolearning/internal/handlers"
 	"robolearning/internal/middleware"
@@ -20,9 +21,7 @@ func main() {
 	cfg := config.Load()
 
 	router := gin.New()
-	// Put CORS first so even 404/401 responses include headers
 	router.Use(buildCORS(cfg), gin.Logger(), gin.Recovery())
-	// Respond OK to any preflight path to avoid 404 without headers
 	router.OPTIONS("/*path", func(c *gin.Context) {
 		c.Status(http.StatusNoContent)
 	})
@@ -34,12 +33,17 @@ func main() {
 	defer db.Close()
 
 	userRepo := repository.NewUserRepository(db)
+	membershipRepo := repository.NewMembershipRepository(db)
+	membershipsCrontroller := controllers.NewMembershipsCrontroller(db)
 	tokenMaker := token.NewJWTMaker(cfg.JWTSecret)
-	authService := services.NewAuthService(userRepo, tokenMaker, cfg)
-	authHandler := handlers.NewAuthHandler(authService, cfg)
+	membershipService := services.NewMembershipService(membershipRepo, membershipsCrontroller)
+	authService := services.NewAuthService(userRepo, membershipRepo, tokenMaker, cfg)
+	authHandler := handlers.NewAuthHandler(authService, membershipService, cfg)
+	membershipHandler := handlers.NewMembershipHandler(membershipService)
 	authMiddleware := middleware.AuthMiddleware(tokenMaker, userRepo)
+	membershipMiddleware := middleware.RequireMembership(membershipService)
 
-	routes.RegisterRoutes(router, authHandler, authMiddleware)
+	routes.RegisterRoutes(router, authHandler, membershipHandler, authMiddleware, membershipMiddleware)
 
 	addr := ":" + cfg.ServerPort
 	if err := router.Run(addr); err != nil {
