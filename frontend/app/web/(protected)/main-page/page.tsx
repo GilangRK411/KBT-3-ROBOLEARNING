@@ -1,9 +1,12 @@
+﻿'use client';
+
 import FloatingBadges from "./partials/floating-badges";
-import FooterSection from "./partials/footer-section";
+import FooterSection from "../../../../components/footer-section";
 import HeroSection from "./partials/hero-section";
-import NavigationBar from "./partials/navigation-bar";
+import NavigationBar from "../../../../components/navigation-bar";
 import PackagesSection, { PackageItem } from "./partials/packages-section";
 import PromoBanner from "./partials/promo-banner";
+import { useAuth } from "@/modules/auth/context/auth-context";
 
 const packages: PackageItem[] = [
   {
@@ -57,12 +60,15 @@ const packages: PackageItem[] = [
 ];
 
 export default function LandingPage() {
+  const { user } = useAuth();
+  const hasMembership = !!user?.membership;
+
   return (
-    <div className="min-h-screen bg-[#F5EDED] text-[#000000]">
-      <PromoBanner />
+    <div className="min-h-screen bg-[#f4f4f5] text-[#000000]">
       <NavigationBar />
       <main className="mx-auto max-w-screen-xl space-y-10 px-4 pb-16 pt-6">
         <HeroSection />
+        {!hasMembership ? <PromoBanner /> : null}
         <PackagesSection packages={packages} />
         <FooterSection />
       </main>

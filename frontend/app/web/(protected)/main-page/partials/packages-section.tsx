@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/modules/auth/context/auth-context";
 import type { Membership } from "@/modules/auth/auth";
-import { useRouter } from "next/navigation";
-import { PROTECTED_ROUTES } from "../../protected";
+import { PROTECTED_ROUTES, classRouteByKey } from "@/config/page-endpoint-config";
 
 export type PackageItem = {
   icon: string;
@@ -27,6 +27,7 @@ const badgeToneClass: Record<PackageItem["badgeTone"], string> = {
 
 export default function PackagesSection({ packages }: { packages: PackageItem[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [lockedActivity, setLockedActivity] = useState<string | null>(null);
   const { user, refreshProfile, loading } = useAuth();
   const membership = (user?.membership as Membership | null) ?? null;
   const endsAt = membership?.ends_at ? formatDate(membership.ends_at) : null;
@@ -97,7 +98,11 @@ export default function PackagesSection({ packages }: { packages: PackageItem[] 
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1.7fr_1.3fr]">
-        <ActivityList />
+        <ActivityList
+          membership={membership}
+          router={router}
+          onLockedClick={(title) => setLockedActivity(title)}
+        />
 
         {showPackages ? (
           <div className="space-y-3 rounded-2xl border border-[#F5EDED] bg-white p-5 shadow-sm">
@@ -145,8 +150,7 @@ export default function PackagesSection({ packages }: { packages: PackageItem[] 
               </span>
             </div>
             <p className="text-sm text-[#3E3636]">
-              Kamu sudah berlangganan. Nikmati akses penuh kelas, sesi live, dan mentor sampai{" "}
-              {endsAt ?? "-"}.
+              Kamu sudah berlangganan. Nikmati akses penuh kelas, sesi live, dan mentor sampai {endsAt ?? "-"}.
             </p>
             <div className="rounded-xl border border-[#D72323]/20 bg-[#D72323]/5 p-4 text-sm text-[#3E3636]">
               <p className="font-semibold text-[#000000]">{membership?.plan?.name ?? "Membership"}</p>
@@ -158,6 +162,37 @@ export default function PackagesSection({ packages }: { packages: PackageItem[] 
           </div>
         )}
       </div>
+
+      {lockedActivity ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-[#D72323] uppercase tracking-wide">
+                Butuh Membership
+              </p>
+              <h3 className="text-lg font-bold text-[#000000]">Akses kelas terkunci</h3>
+              <p className="text-sm text-[#3E3636]">
+                Kamu belum berlangganan. Untuk membuka kelas <strong>{lockedActivity}</strong>, aktifkan
+                membership terlebih dahulu.
+              </p>
+            </div>
+            <div className="mt-5 flex gap-3">
+              <button
+                className="flex-1 rounded-full bg-[#D72323] px-4 py-2 text-sm font-semibold text-white shadow transition hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D72323]"
+                onClick={() => router.push(PROTECTED_ROUTES.membership)}
+              >
+                Buka halaman membership
+              </button>
+              <button
+                className="rounded-full border border-[#D72323] px-4 py-2 text-xs font-semibold text-[#D72323] transition hover:bg-[#D72323] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D72323]"
+                onClick={() => setLockedActivity(null)}
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -171,57 +206,51 @@ type ActivityItem = {
 };
 
 const activities: ActivityItem[] = [
-  {
-    title: "Dasar Robotika & Mekanika",
-    status: "ongoing",
-    actionLabel: "Lanjutkan",
-  },
-  {
-    title: "Simulasi IoT: Sensor & Aktuator",
-    status: "completed",
-    actionLabel: "Lihat Sertifikat",
-  },
-  {
-    title: "Proyek Smart Home dengan ESP32",
-    status: "ongoing",
-    actionLabel: "Lanjutkan",
-  },
-  {
-    title: "Vision Robotika dengan Kamera",
-    status: "ongoing",
-    actionLabel: "Lanjutkan",
-  },
+  { title: "Dasar Robotika & Mekanika", status: "ongoing", actionLabel: "Lanjutkan" },
+  { title: "Simulasi IoT: Sensor & Aktuator", status: "ongoing", actionLabel: "Lanjutkan" },
+  { title: "Proyek Smart Home dengan ESP32", status: "ongoing", actionLabel: "Lanjutkan" },
+  { title: "Vision Robotika dengan Kamera", status: "ongoing", actionLabel: "Lanjutkan" },
 ];
 
 function formatDate(value?: string) {
   if (!value) return null;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  return date.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-function ActivityList() {
+function ActivityList({
+  membership,
+  router,
+  onLockedClick,
+}: {
+  membership: Membership | null;
+  router: ReturnType<typeof useRouter>;
+  onLockedClick: (title: string) => void;
+}) {
   return (
-      <div className="space-y-3 rounded-2xl border border-[#F5EDED] bg-white p-5 shadow-sm">
-        <div className="flex items-center gap-2 border-b border-[#F5EDED] pb-3">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F5EDED] text-xs font-bold text-[#D72323]">
-            AB
-          </span>
-          <div>
-            <p className="text-sm font-semibold text-[#000000]">Aktivitas Belajar</p>
-            <p className="text-xs text-[#3E3636]">
-              Pantau progres kelas robotika, IoT, dan proyek tematik yang sedang dijalani
-            </p>
-          </div>
+    <div className="space-y-3 rounded-2xl border border-[#F5EDED] bg-white p-5 shadow-sm">
+      <div className="flex items-center gap-2 border-b border-[#F5EDED] pb-3">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F5EDED] text-xs font-bold text-[#D72323]">
+          AB
+        </span>
+        <div>
+          <p className="text-sm font-semibold text-[#000000]">Aktivitas Belajar</p>
+          <p className="text-xs text-[#3E3636]">
+            Pantau progres kelas robotika, IoT, dan proyek tematik yang sedang dijalani
+          </p>
         </div>
+      </div>
 
       <div className="space-y-3">
         {activities.map((activity) => (
-          <ActivityCard key={activity.title} activity={activity} />
+          <ActivityCard
+            key={activity.title}
+            activity={activity}
+            membership={membership}
+            router={router}
+            onLockedClick={onLockedClick}
+          />
         ))}
       </div>
 
@@ -234,9 +263,28 @@ function ActivityList() {
   );
 }
 
-function ActivityCard({ activity }: { activity: ActivityItem }) {
+function ActivityCard({
+  activity,
+  membership,
+  router,
+  onLockedClick,
+}: {
+  activity: ActivityItem;
+  membership: Membership | null;
+  router: ReturnType<typeof useRouter>;
+  onLockedClick: (title: string) => void;
+}) {
   const isCompleted = activity.status === "completed";
-  const statusLabel = isCompleted ? "Telah diselesaikan" : "Sedang dipelajari";
+  const statusLabel = membership ? (isCompleted ? "Telah diselesaikan" : "Sedang dipelajari") : "";
+
+  const handleClick = () => {
+    if (!membership) {
+      onLockedClick(activity.title);
+      return;
+    }
+    const path = resolveClassPath(activity.title);
+    if (path) router.push(path);
+  };
 
   return (
     <div
@@ -245,14 +293,13 @@ function ActivityCard({ activity }: { activity: ActivityItem }) {
       }`}
     >
       <div className="flex items-center justify-between">
-        <p
-          className={`text-xs font-semibold ${
-            isCompleted ? "text-[#2F7A4D]" : "text-[#3E3636]"
-          }`}
-        >
-          {statusLabel} {isCompleted ? "✓" : ""}
+        <p className={`text-xs font-semibold ${isCompleted ? "text-[#2F7A4D]" : "text-[#3E3636]"}`}>
+          {statusLabel}
         </p>
-        <button className="text-xs font-semibold text-[#D72323] underline decoration-[#D72323]/60 underline-offset-4 transition hover:opacity-80">
+        <button
+          className="text-xs font-semibold text-[#D72323] underline decoration-[#D72323]/60 underline-offset-4 transition hover:opacity-80"
+          onClick={handleClick}
+        >
           {activity.actionLabel}
         </button>
       </div>
@@ -276,9 +323,7 @@ function PackageCard({ item, onSelect }: { item: PackageItem; onSelect: () => vo
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F5EDED] text-sm font-bold text-[#D72323]">
               {item.icon}
             </span>
-            <span
-              className={`rounded-full px-3 py-1 text-[11px] font-semibold ${badgeToneClass[item.badgeTone]}`}
-            >
+            <span className={`rounded-full px-3 py-1 text-[11px] font-semibold ${badgeToneClass[item.badgeTone]}`}>
               {item.badge}
             </span>
           </div>
@@ -314,9 +359,7 @@ function PackageCard({ item, onSelect }: { item: PackageItem; onSelect: () => vo
       <div className="mt-auto flex items-center justify-between pt-4">
         <div>
           {item.priceNote ? <p className="text-xs font-semibold text-[#3E3636]">{item.priceNote}</p> : null}
-          {item.price ? (
-            <p className="text-lg font-bold text-[#D72323]">{item.price}</p>
-          ) : null}
+          {item.price ? <p className="text-lg font-bold text-[#D72323]">{item.price}</p> : null}
         </div>
         <button
           onClick={onSelect}
@@ -331,4 +374,11 @@ function PackageCard({ item, onSelect }: { item: PackageItem; onSelect: () => vo
       </div>
     </div>
   );
+}
+
+function resolveClassPath(title: string): string | null {
+  const lower = title.toLowerCase();
+  if (lower.includes("iot")) return classRouteByKey("iot");
+  if (lower.includes("robot")) return classRouteByKey("robotik");
+  return null;
 }

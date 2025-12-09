@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import NavigationBar from "../main-page/partials/navigation-bar";
+import NavigationBar from "../../../../components/navigation-bar";
 import { useAuth } from "@/modules/auth/context/auth-context";
 import type { Membership } from "@/modules/auth/auth";
 import { fetchMembershipPlans, type MembershipPlan } from "@/modules/membership/membership";
-import { PROTECTED_ROUTES, buildCheckoutUrl } from "../protected";
+import { PROTECTED_ROUTES, buildCheckoutUrl } from "@/config/page-endpoint-config";
 
 type PlanView = MembershipPlan & {
   number: number;
@@ -91,7 +91,7 @@ export default function MembershipPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5EDED] text-[#3E3636]">
+    <div className="min-h-screen bg-[#f4f4f5] text-[#3E3636]">
       <NavigationBar />
 
       <main className="mx-auto max-w-screen-xl px-4 pb-16 pt-8 space-y-10">

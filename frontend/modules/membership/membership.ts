@@ -1,4 +1,5 @@
 import { api } from "@/lib/client";
+import { MEMBERSHIP_API_ENDPOINTS } from "@/config/api-endpoints";
 
 export type MembershipPlan = {
   id: number;
@@ -36,7 +37,9 @@ type PlansResponse = {
 };
 
 export async function fetchMembershipPlans(): Promise<MembershipPlan[]> {
-  const res = await api("/memberships/plans", { method: "GET" });
+  const res = await api(MEMBERSHIP_API_ENDPOINTS.plans.path, {
+    method: MEMBERSHIP_API_ENDPOINTS.plans.method,
+  });
   if (!res.ok) {
     throw new Error("Gagal memuat paket membership");
   }
@@ -46,7 +49,10 @@ export async function fetchMembershipPlans(): Promise<MembershipPlan[]> {
 
 export async function getPlan(planInput: string | number): Promise<MembershipPlan> {
   const input = typeof planInput === "number" ? String(planInput) : planInput;
-  const res = await api(`/memberships/plan/${input}`, { method: "GET" });
+  const res = await api(
+    MEMBERSHIP_API_ENDPOINTS.planDetail.path.replace(":plan", input),
+    { method: MEMBERSHIP_API_ENDPOINTS.planDetail.method }
+  );
   if (!res.ok) {
     throw new Error("Paket tidak ditemukan");
   }
@@ -55,8 +61,8 @@ export async function getPlan(planInput: string | number): Promise<MembershipPla
 }
 
 export async function createCheckout(planNumber: number): Promise<CheckoutSession> {
-  const res = await api("/memberships/checkout", {
-    method: "POST",
+  const res = await api(MEMBERSHIP_API_ENDPOINTS.createCheckout.path, {
+    method: MEMBERSHIP_API_ENDPOINTS.createCheckout.method,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ plan: planNumber }),
   });
@@ -68,7 +74,10 @@ export async function createCheckout(planNumber: number): Promise<CheckoutSessio
 }
 
 export async function confirmCheckout(sessionId: number): Promise<Membership> {
-  const res = await api(`/memberships/checkout/${sessionId}/confirm`, { method: "POST" });
+  const res = await api(
+    MEMBERSHIP_API_ENDPOINTS.confirmCheckout.path.replace(":id", String(sessionId)),
+    { method: MEMBERSHIP_API_ENDPOINTS.confirmCheckout.method }
+  );
   if (!res.ok) {
     throw new Error("Gagal mengonfirmasi checkout");
   }

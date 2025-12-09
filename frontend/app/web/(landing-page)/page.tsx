@@ -1,6 +1,12 @@
+'use client';
+
+import Image from "next/image";
 import Link from "next/link";
 
-import { WEB_ROUTES } from "@/config/page-endpoint-config";
+import NavigationBar from "../../../components/navigation-bar";
+import brandLogo from "@/assets/robolearning-logo.png";
+import { PROTECTED_ROUTES, WEB_ROUTES } from "@/config/page-endpoint-config";
+import { useAuth } from "@/modules/auth/context/auth-context";
 import EventsSection from "./partials/events-section";
 import StepsSection from "./partials/steps-section";
 import TestimonialsSection from "./partials/testimonials-section";
@@ -9,9 +15,12 @@ const navItems = ["Learning Path", "Langganan", "Program", "Capaian & Dampak", "
 const skillBadges = ["Web", "Android", "iOS"];
 
 export default function PublicLandingPage() {
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
+
   return (
-    <div className="min-h-screen bg-[#F5EDED] text-[#3E3636]">
-      <Header />
+    <div className="min-h-screen bg-[#f4f4f5] text-[#3E3636]">
+      {isLoggedIn ? <NavigationBar /> : <Header />}
 
       <main className="mx-auto max-w-screen-xl px-4 pb-16 pt-8 lg:pt-10">
         <div className="space-y-12">
@@ -31,20 +40,31 @@ export default function PublicLandingPage() {
                   proyek nyata, dan dukungan komunitas supaya kamu konsisten sampai dapat hasil.
                 </p>
 
-                <div className="flex flex-wrap items-center gap-3">
-                  <Link
-                    href={WEB_ROUTES.register.path}
-                    className="rounded-full bg-[#D72323] px-5 py-2.5 text-xs font-semibold text-white shadow transition hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D72323]"
-                  >
-                    Belajar Sekarang
-                  </Link>
-                  <Link
-                    href={WEB_ROUTES.login.path}
-                    className="rounded-full border border-[#3E3636] px-5 py-2.5 text-xs font-semibold text-[#3E3636] transition hover:border-[#D72323] hover:text-[#D72323] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D72323]"
-                  >
-                    Masuk untuk lanjut
-                  </Link>
-                </div>
+                {isLoggedIn ? (
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Link
+                      href={PROTECTED_ROUTES.main}
+                      className="rounded-full bg-[#D72323] px-5 py-2.5 text-xs font-semibold text-white shadow transition hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D72323]"
+                    >
+                      Belajar sekarang
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Link
+                      href={WEB_ROUTES.register.path}
+                      className="rounded-full bg-[#D72323] px-5 py-2.5 text-xs font-semibold text-white shadow transition hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D72323]"
+                    >
+                      Belajar Sekarang
+                    </Link>
+                    <Link
+                      href={WEB_ROUTES.login.path}
+                      className="rounded-full border border-[#3E3636] px-5 py-2.5 text-xs font-semibold text-[#3E3636] transition hover:border-[#D72323] hover:text-[#D72323] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D72323]"
+                    >
+                      Masuk untuk lanjut
+                    </Link>
+                  </div>
+                )}
 
                 <div className="flex flex-wrap items-center gap-3">
                   {skillBadges.map((skill) => (
@@ -123,12 +143,9 @@ function Header() {
   return (
     <header className="border-b border-[#F5EDED] bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-screen-xl items-center gap-6 px-4 py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#D72323] text-sm font-bold text-white shadow-sm shadow-[#D72323]/30">
-            RL
-          </div>
-          <span className="text-lg font-semibold tracking-tight text-[#3E3636]">RoboLearning</span>
-        </div>
+        <Link href={WEB_ROUTES.landing} className="flex items-center" aria-label="Beranda RoboLearning">
+          <Image src={brandLogo} alt="RoboLearning" className="h-12 w-auto" priority />
+        </Link>
 
         <div className="hidden flex-1 items-center gap-4 lg:flex">
           <nav className="flex items-center gap-5 text-sm font-semibold text-[#3E3636]">

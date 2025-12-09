@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import NavigationBar from "../main-page/partials/navigation-bar";
-import FooterSection from "../main-page/partials/footer-section";
-import { PROTECTED_ROUTES } from "../protected";
+import NavigationBar from "../../../../components/navigation-bar";
+import FooterSection from "../../../../components/footer-section";
+import { PROTECTED_ROUTES } from "@/config/page-endpoint-config";
 import { useAuth } from "@/modules/auth/context/auth-context";
 import {
   confirmCheckout,
@@ -74,7 +74,7 @@ export default function CheckoutPage() {
   const planLabel = plan?.name ?? `Paket ${planParam ?? "-"}`;
 
   return (
-    <div className="min-h-screen bg-[#F5EDED] text-[#3E3636]">
+    <div className="min-h-screen bg-[#f4f4f5] text-[#3E3636]">
       <NavigationBar />
       <main className="mx-auto max-w-screen-md space-y-6 px-4 pb-16 pt-10">
         <div className="rounded-3xl border border-[#F5EDED] bg-white p-6 shadow-sm">

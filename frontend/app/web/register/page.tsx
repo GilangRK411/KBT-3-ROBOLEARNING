@@ -5,7 +5,7 @@ import { WEB_ROUTES } from "@/config/page-endpoint-config";
 
 export default function RegisterPage() {
   return (
-    <div className="min-h-screen bg-[#F5EDED] text-[#3E3636]">
+    <div className="min-h-screen bg-[#f4f4f5] text-[#3E3636]">
       <div className="relative mx-auto flex min-h-screen max-w-screen-lg items-center justify-center px-4 py-10">
         <div className="absolute left-6 top-10 h-32 w-32 rounded-full bg-[#D72323]/10 blur-3xl" />
         <div className="absolute right-8 bottom-8 h-36 w-36 rounded-full bg-[#3E3636]/10 blur-3xl" />

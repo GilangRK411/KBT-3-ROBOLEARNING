@@ -4,7 +4,7 @@ async function refreshToken(): Promise<void> {
   const res = await fetch(`${BASE_URL}/refresh`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({}), // backend will also read refresh token from cookie
+    body: JSON.stringify({}),
     credentials: "include",
   });
 
