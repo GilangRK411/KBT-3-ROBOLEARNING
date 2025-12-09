@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@/config/context/auth-context";
+import type { Membership } from "@/modules/auth/auth";
+import { useRouter } from "next/navigation";
 
 export type PackageItem = {
   icon: string;
@@ -23,6 +26,12 @@ const badgeToneClass: Record<PackageItem["badgeTone"], string> = {
 
 export default function PackagesSection({ packages }: { packages: PackageItem[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const { user, refreshProfile, loading } = useAuth();
+  const membership = (user?.membership as Membership | null) ?? null;
+  const endsAt = membership?.ends_at ? formatDate(membership.ends_at) : null;
+  const isChecking = loading && !user;
+  const router = useRouter();
+  const showPackages = !membership;
 
   return (
     <section className="space-y-5">
@@ -48,17 +57,39 @@ export default function PackagesSection({ packages }: { packages: PackageItem[] 
             </span>
             <div className="space-y-1">
               <p className="text-sm font-semibold text-[#000000]">Status Langganan</p>
-              <p className="text-xs text-[#3E3636]">
-                Akses kelas, live session, dan mentor dalam satu keanggotaan terintegrasi.
-              </p>
+              {isChecking ? (
+                <p className="text-xs text-[#3E3636]">Memeriksa status langganan...</p>
+              ) : membership ? (
+                <p className="text-xs text-[#3E3636]">
+                  {membership.plan?.name ?? "Membership aktif"} · Berlaku sampai {endsAt ?? "-"}
+                </p>
+              ) : (
+                <p className="text-xs text-[#3E3636]">
+                  Belum ada langganan aktif. Aktifkan untuk akses kelas, live session, dan mentor.
+                </p>
+              )}
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <span className="rounded-full bg-[#F5EDED] px-3 py-1 text-[11px] font-semibold text-[#D72323]">
-              Belum aktif
+            <span
+              className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
+                membership ? "bg-[#D72323]/10 text-[#D72323]" : "bg-[#F5EDED] text-[#D72323]"
+              }`}
+            >
+              {isChecking ? "Memeriksa..." : membership ? "Aktif" : "Belum aktif"}
             </span>
-            <button className="rounded-full bg-[#D72323] px-4 py-2 text-xs font-semibold text-white shadow transition hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D72323]">
-              Aktifkan Langganan
+            <button
+              onClick={() => {
+                if (membership) {
+                  refreshProfile().catch(() => {});
+                } else {
+                  router.push("/web/membership-page");
+                }
+              }}
+              disabled={loading}
+              className="rounded-full bg-[#D72323] px-4 py-2 text-xs font-semibold text-white shadow transition hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D72323] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {membership ? "Perbarui Status" : "Mulai Berlangganan"}
             </button>
           </div>
         </div>
@@ -67,42 +98,64 @@ export default function PackagesSection({ packages }: { packages: PackageItem[] 
       <div className="grid gap-4 lg:grid-cols-[1.7fr_1.3fr]">
         <ActivityList />
 
-        <div className="space-y-3 rounded-2xl border border-[#F5EDED] bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-[#000000]">Paket Membership</p>
-              <p className="text-xs text-[#3E3636]">Geser untuk lihat pilihan langganan</p>
+        {showPackages ? (
+          <div className="space-y-3 rounded-2xl border border-[#F5EDED] bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-[#000000]">Paket Membership</p>
+                <p className="text-xs text-[#3E3636]">Geser untuk lihat pilihan langganan</p>
+              </div>
+              <span className="text-[11px] font-semibold text-[#D72323]">All Access</span>
             </div>
-            <span className="text-[11px] font-semibold text-[#D72323]">All Access</span>
-          </div>
-          <div className="overflow-hidden rounded-2xl border border-[#F5EDED]">
-            <div
-              className="flex transition-transform duration-500 ease-out"
-              style={{ transform: `translateX(-${activeIndex * 100}%)` }}
-            >
-              {packages.map((item) => (
-                <div key={item.title} className="w-full flex-shrink-0 px-1 py-1">
-                  <PackageCard item={item} />
-                </div>
+            <div className="overflow-hidden rounded-2xl border border-[#F5EDED]">
+              <div
+                className="flex transition-transform duration-500 ease-out"
+                style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+              >
+                {packages.map((item) => (
+                  <div key={item.title} className="w-full flex-shrink-0 px-1 py-1">
+                    <PackageCard item={item} onSelect={() => router.push("/web/membership-page")} />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-2 pt-1">
+              {packages.map((_, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  aria-label={`Paket ${idx + 1}`}
+                  className={`h-2.5 w-2.5 rounded-full transition ${
+                    activeIndex === idx
+                      ? "bg-[#D72323]"
+                      : "border border-[#D72323]/40 bg-[#F5EDED]"
+                  }`}
+                  onClick={() => setActiveIndex(idx)}
+                />
               ))}
             </div>
           </div>
-          <div className="flex items-center justify-center gap-2 pt-1">
-            {packages.map((_, idx) => (
-              <button
-                key={idx}
-                type="button"
-                aria-label={`Paket ${idx + 1}`}
-                className={`h-2.5 w-2.5 rounded-full transition ${
-                  activeIndex === idx
-                    ? "bg-[#D72323]"
-                    : "border border-[#D72323]/40 bg-[#F5EDED]"
-                }`}
-                onClick={() => setActiveIndex(idx)}
-              />
-            ))}
+        ) : (
+          <div className="space-y-3 rounded-2xl border border-[#D72323]/10 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-[#000000]">Membership Aktif</p>
+              <span className="text-[11px] font-semibold text-[#D72323]">
+                {membership?.plan?.code ?? "aktif"}
+              </span>
+            </div>
+            <p className="text-sm text-[#3E3636]">
+              Kamu sudah berlangganan. Nikmati akses penuh kelas, sesi live, dan mentor sampai{" "}
+              {endsAt ?? "-"}.
+            </p>
+            <div className="rounded-xl border border-[#D72323]/20 bg-[#D72323]/5 p-4 text-sm text-[#3E3636]">
+              <p className="font-semibold text-[#000000]">{membership?.plan?.name ?? "Membership"}</p>
+              <p>
+                Durasi: {membership?.plan?.duration_days ?? "-"} hari · Harga: Rp{" "}
+                {membership?.plan?.price_idr?.toLocaleString("id-ID") ?? "-"}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );
@@ -138,6 +191,17 @@ const activities: ActivityItem[] = [
     actionLabel: "Lanjutkan",
   },
 ];
+
+function formatDate(value?: string) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
 
 function ActivityList() {
   return (
@@ -196,7 +260,7 @@ function ActivityCard({ activity }: { activity: ActivityItem }) {
   );
 }
 
-function PackageCard({ item }: { item: PackageItem }) {
+function PackageCard({ item, onSelect }: { item: PackageItem; onSelect: () => void }) {
   const isHighlighted = item.tag === "Paling diminati" || item.tag === "Serius upgrade";
 
   return (
@@ -254,6 +318,7 @@ function PackageCard({ item }: { item: PackageItem }) {
           ) : null}
         </div>
         <button
+          onClick={onSelect}
           className={`rounded-full px-4 py-2 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D72323] ${
             isHighlighted
               ? "bg-[#D72323] text-white shadow hover:opacity-90"

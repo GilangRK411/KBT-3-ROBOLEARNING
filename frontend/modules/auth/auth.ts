@@ -2,12 +2,33 @@ import { AUTH_API_ENDPOINTS } from "@/config/api-endpoints";
 
 import { api } from "../../lib/client";
 
+export type MembershipPlan = {
+  id: number;
+  code: string;
+  name: string;
+  duration_days: number;
+  price_idr: number;
+  created_at: string;
+};
+
+export type Membership = {
+  id: number;
+  user_id: number;
+  plan_id: number;
+  starts_at: string;
+  ends_at: string;
+  status: string;
+  created_at: string;
+  plan?: MembershipPlan;
+};
+
 export type User = {
   id: number;
   name: string;
   username: string;
   birthdate?: string;
   email: string;
+  membership?: Membership | null;
 };
 
 export type AuthResponse = {
