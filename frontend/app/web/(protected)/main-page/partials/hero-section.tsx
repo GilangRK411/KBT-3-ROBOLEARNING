@@ -25,16 +25,32 @@ export default function HeroSection() {
   const { user } = useAuth();
   const hasMembership = !!user?.membership;
 
+  if (hasMembership) {
+    return (
+      <section className="rounded-[20px] border border-[#E5E7EB] bg-white px-6 py-10 shadow-sm md:px-10">
+        <div className="space-y-3 text-center md:text-left">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#D72323]">Membership aktif</p>
+          <h1 className="text-3xl font-bold leading-tight text-[#0F172A] md:text-4xl">
+            Belajar IoT &amp; Robotika 
+          </h1>
+          <p className="mx-auto max-w-3xl text-sm text-[#4B5563] md:mx-0">
+            Semua kelas sudah terbuka. Lanjutkan materi atau pilih kelas di bawah sesuai kebutuhanmu.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section className="rounded-[28px] border border-[#E5E7EB] bg-white px-6 py-12 shadow-sm md:px-10">
-      <div className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-center">
+    <section className="rounded-[20px] border border-[#E5E7EB] bg-white px-6 py-10 shadow-sm md:px-10">
+      <div className="grid gap-8 md:grid-cols-[1.1fr_0.9fr] md:items-center">
         <div className="space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#D72323] shadow-sm">
+          <div className="inline-flex items-center gap-2 rounded-full bg-[#F8FAFC] px-3 py-1 text-xs font-semibold text-[#D72323]">
             <span className="h-2 w-2 rounded-full bg-[#D72323]" />
             IoT &amp; Robotika · Hybrid Learning
           </div>
           <h1 className="text-3xl font-bold leading-tight text-[#0F172A] md:text-4xl">
-            Belajar IoT &amp; Robotika secara fokus, tanpa distraksi
+            Belajar IoT &amp; Robotika
           </h1>
           <p className="max-w-2xl text-sm text-[#374151]">
             Materi ringkas, sesi live, dan kit fisik yang langsung bisa dipakai. Bangun skill inti IoT &
@@ -52,7 +68,7 @@ export default function HeroSection() {
 
           <ul className="space-y-3 text-sm text-[#374151]">
             {featureList.map((item) => (
-              <li key={item} className="flex items-start gap-3 rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
+              <li key={item} className="flex items-start gap-3 rounded-2xl bg-[#F8FAFC] px-4 py-3">
                 <span className="mt-1 inline-block h-2 w-2 rounded-full bg-[#D72323]" />
                 <span>{item}</span>
               </li>
@@ -60,35 +76,10 @@ export default function HeroSection() {
           </ul>
         </div>
 
-        {hasMembership ? (
-          <div className="rounded-3xl border border-white/60 bg-white/90 p-6 shadow-sm backdrop-blur">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#D72323]/10 text-sm font-bold text-[#D72323]">
-                  RL
-                </span>
-                <div>
-                  <p className="text-sm font-semibold text-[#0F172A]">Simulasi langsung</p>
-                  <p className="text-xs text-[#6B7280]">Sensor, aktuator, dan AI edge siap diuji</p>
-                </div>
-              </div>
-              <div className="rounded-2xl border border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3 text-sm text-[#0F172A]">
-                <p className="font-semibold">Build your first robot</p>
-                <p className="text-xs text-[#6B7280]">Rangkai, program, dan jalankan dalam satu sesi.</p>
-              </div>
-              <div className="flex flex-wrap gap-2 text-[11px] font-semibold text-[#0F172A]">
-                <span className="rounded-full bg-[#D72323]/10 px-3 py-1 text-[#D72323]">IoT</span>
-                <span className="rounded-full bg-[#E5E7EB] px-3 py-1">Robotik</span>
-                <span className="rounded-full bg-[#E5E7EB] px-3 py-1">AI Edge</span>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="grid gap-4 rounded-3xl border border-white/60 bg-white/90 p-6 shadow-sm backdrop-blur md:grid-cols-2">
-            <IconColumn title="IoT" icons={iotIcons} direction="down" />
-            <IconColumn title="Robotik" icons={robotikIcons} direction="up" />
-          </div>
-        )}
+        <div className="grid gap-3 rounded-2xl border border-[#E5E7EB] bg-[#F8FAFC] p-5 md:grid-cols-2">
+          <IconColumn title="IoT" icons={iotIcons} direction="down" />
+          <IconColumn title="Robotik" icons={robotikIcons} direction="up" />
+        </div>
       </div>
 
       <style jsx global>{`
@@ -114,8 +105,6 @@ export default function HeroSection() {
         .animate-scroll-up {
           animation: scroll-up 20s linear infinite;
         }
-        
-        /* Pastikan hardware acceleration aktif */
         .animate-scroll-down,
         .animate-scroll-up {
           will-change: transform;

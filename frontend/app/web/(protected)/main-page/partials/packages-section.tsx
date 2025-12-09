@@ -1,10 +1,13 @@
 "use client";
 
+import Image, { type StaticImageData } from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/modules/auth/context/auth-context";
 import type { Membership } from "@/modules/auth/auth";
 import { PROTECTED_ROUTES, classRouteByKey } from "@/config/page-endpoint-config";
+import iotThumb from "@/assets/class/iot/iot-1.png";
+import robotThumb from "@/assets/class/robotik/robot-1.png";
 
 export type PackageItem = {
   icon: string;
@@ -97,14 +100,14 @@ export default function PackagesSection({ packages }: { packages: PackageItem[] 
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.7fr_1.3fr]">
-        <ActivityList
-          membership={membership}
-          router={router}
-          onLockedClick={(title) => setLockedActivity(title)}
-        />
+      {showPackages ? (
+        <div className="grid gap-4 lg:grid-cols-[1.7fr_1.3fr]">
+          <ActivityList
+            membership={membership}
+            router={router}
+            onLockedClick={(title) => setLockedActivity(title)}
+          />
 
-        {showPackages ? (
           <div className="space-y-3 rounded-2xl border border-[#F5EDED] bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -141,27 +144,17 @@ export default function PackagesSection({ packages }: { packages: PackageItem[] 
               ))}
             </div>
           </div>
-        ) : (
-          <div className="space-y-3 rounded-2xl border border-[#D72323]/10 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-[#000000]">Membership Aktif</p>
-              <span className="text-[11px] font-semibold text-[#D72323]">
-                {membership?.plan?.code ?? "aktif"}
-              </span>
-            </div>
-            <p className="text-sm text-[#3E3636]">
-              Kamu sudah berlangganan. Nikmati akses penuh kelas, sesi live, dan mentor sampai {endsAt ?? "-"}.
-            </p>
-            <div className="rounded-xl border border-[#D72323]/20 bg-[#D72323]/5 p-4 text-sm text-[#3E3636]">
-              <p className="font-semibold text-[#000000]">{membership?.plan?.name ?? "Membership"}</p>
-              <p>
-                Durasi: {membership?.plan?.duration_days ?? "-"} hari · Harga: Rp{" "}
-                {membership?.plan?.price_idr?.toLocaleString("id-ID") ?? "-"}
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <ActivityList
+            membership={membership}
+            router={router}
+            onLockedClick={(title) => setLockedActivity(title)}
+          />
+          <ClassesGrid />
+        </div>
+      )}
 
       {lockedActivity ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
@@ -381,4 +374,58 @@ function resolveClassPath(title: string): string | null {
   if (lower.includes("iot")) return classRouteByKey("iot");
   if (lower.includes("robot")) return classRouteByKey("robotik");
   return null;
+}
+
+function ClassesGrid() {
+  const cards: { title: string; desc: string; image: StaticImageData; badge: string; href: string }[] = [
+    {
+      title: "Kelas IoT",
+      desc: "Bangun perangkat pintar, sensor, dan kontrol cloud-ready.",
+      image: iotThumb,
+      badge: "IoT",
+      href: classRouteByKey("iot"),
+    },
+    {
+      title: "Kelas Robotik",
+      desc: "Rakit, program, dan uji gerak robot dengan alur praktis.",
+      image: robotThumb,
+      badge: "Robotik",
+      href: classRouteByKey("robotik"),
+    },
+  ];
+
+  return (
+    <div className="rounded-2xl border border-[#F5EDED] bg-white p-5 shadow-sm">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-semibold text-[#000000]">Kelas untukmu</p>
+          <p className="text-xs text-[#3E3636]">Pilih kelas dan lanjutkan belajar</p>
+        </div>
+        <span className="text-[11px] font-semibold text-[#D72323]">All Access</span>
+      </div>
+
+      <div className="mt-4 grid gap-4 md:grid-cols-2">
+        {cards.map((card) => (
+          <a
+            key={card.title}
+            href={card.href}
+            className="group flex gap-3 rounded-2xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 transition hover:-translate-y-1 hover:shadow-md"
+          >
+            <div className="h-14 w-14 overflow-hidden rounded-xl bg-white shadow-sm">
+              <Image src={card.image} alt={card.title} className="h-full w-full object-cover" />
+            </div>
+            <div className="space-y-1">
+              <span className="inline-flex w-fit items-center rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[#D72323] shadow-sm">
+                {card.badge}
+              </span>
+              <p className="text-sm font-semibold text-[#0F172A] group-hover:text-[#D72323] transition">
+                {card.title}
+              </p>
+              <p className="text-xs text-[#4B5563]">{card.desc}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
 }
