@@ -26,7 +26,6 @@ const heroGallery = [
   },
   {
     title: "Kit robotik",
-    caption: "Dummy kit, siap diganti",
     src: "https://images.unsplash.com/photo-1582719478248-54e9f2a4f6f7?auto=format&fit=crop&w=800&q=60",
   },
   {
@@ -173,9 +172,6 @@ export default function PublicLandingPage() {
                         <p className="text-lg font-bold text-[#000000]">Robotik &amp; IoT profesional</p>
                         <p className="text-xs text-[#3E3636]">Mode mentor-led + project-based</p>
                       </div>
-                      <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[#3E3636] shadow-sm">
-                        Progress 62%
-                      </span>
                     </div>
 
                     <div className="space-y-3">
@@ -241,7 +237,6 @@ export default function PublicLandingPage() {
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-[#D72323]">Cuplikan kelas</p>
-                      <p className="text-sm font-semibold text-[#000000]">Dummy visual, siap diganti</p>
                     </div>
                     <span className="rounded-full bg-[#F5EDED] px-3 py-1 text-[11px] font-semibold text-[#3E3636]">
                       Preview
