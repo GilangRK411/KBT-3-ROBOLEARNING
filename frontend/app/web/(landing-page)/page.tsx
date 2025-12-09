@@ -33,7 +33,7 @@ export default function PublicLandingPage() {
                   Learning Path
                 </div>
                 <h1 className="text-3xl font-bold leading-tight text-[#000000] sm:text-4xl lg:text-5xl">
-                  Bangun Karirmu Sebagai Developer Profesional
+                  Bangun Karirmu Sebagai Robotik Profesional
                 </h1>
                 <p className="max-w-2xl text-sm leading-relaxed text-[#3E3636]">
                   Mulai belajar terarah dengan jalur yang sudah dikurasi mentor. Simulasi real,

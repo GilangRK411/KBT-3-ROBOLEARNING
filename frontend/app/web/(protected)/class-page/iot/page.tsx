@@ -126,8 +126,8 @@ export default function IoTClassPage() {
               <p className="text-sm font-semibold text-[#0F172A]">Kit & simulasi</p>
               <p className="text-xs text-[#6B7280]">Siapkan board, sensor, dan koneksi WiFi sebelum mulai.</p>
             </div>
-            <div className="overflow-hidden rounded-xl border border-[#E5E7EB] bg-white">
-              <Image src{iotHero} alt="Ilustrasi IoT" className="h-full w-full object-cover" />
+            <div className="relative h-40 overflow-hidden rounded-xl border border-[#E5E7EB] bg-white md:h-48">
+              <Image src={iotHero} alt="Ilustrasi IoT" fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
             </div>
           </div>
         </section>
