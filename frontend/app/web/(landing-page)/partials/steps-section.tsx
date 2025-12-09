@@ -33,7 +33,7 @@ export default function StepsSection() {
         </p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+      <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
         <div className="relative overflow-hidden rounded-[24px] border border-[#F5EDED] bg-[#F5EDED]/70 shadow-sm">
           <img
             src={visuals[0]}
@@ -41,7 +41,7 @@ export default function StepsSection() {
             className="h-full max-h-[360px] w-full object-cover"
             loading="lazy"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#000000]/25 via-transparent to-transparent" />
+          <div className="absolute inset-0" />
           <div className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[#3E3636] shadow">
             Hybrid kit + digital
           </div>
@@ -81,7 +81,7 @@ export default function StepsSection() {
             {steps.map((step, index) => (
               <li
                 key={step.title}
-                className="relative grid gap-2 rounded-2xl border border-[#F5EDED] bg-white p-4 pl-14 shadow-sm"
+                className="relative grid gap-2 bg-white p-4 pl-14"
               >
                 <span className="absolute left-1 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#D72323]/10 text-sm font-bold text-[#D72323]">
                   {index + 1}
