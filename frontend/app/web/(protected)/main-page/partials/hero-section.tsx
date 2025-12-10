@@ -47,7 +47,7 @@ export default function HeroSection() {
         <div className="space-y-6">
           <div className="inline-flex items-center gap-2 rounded-full bg-[#F8FAFC] px-3 py-1 text-xs font-semibold text-[#D72323]">
             <span className="h-2 w-2 rounded-full bg-[#D72323]" />
-            IoT &amp; Robotika · Hybrid Learning
+            Robolearning
           </div>
           <h1 className="text-3xl font-bold leading-tight text-[#0F172A] md:text-4xl">
             Belajar IoT &amp; Robotika
